@@ -86,9 +86,7 @@ export const HomePage = () => {
 
   return (
     <main className={classes.root}>
-      <h1 className={classes.headline}>
-        Everything the studio runs, in one place.
-      </h1>
+      <h1 className={classes.headline}>Welcome Backstage</h1>
       {systems && (
         <p className={classes.summary}>
           {systems.length} systems and {componentCount} components, each with an
