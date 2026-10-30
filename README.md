@@ -85,8 +85,10 @@ docker compose up -d
 
 ## What's next
 
-1. Live CI and Kubernetes status on each catalog page.
-2. Self-service templates that create a new service with CI, docs, and a
+1. Run the portal publicly at its own address, with HTTPS, real sign-in in place
+   of guest access, and a privacy review of what the catalog exposes.
+2. Live CI and Kubernetes status on each catalog page.
+3. Self-service templates that create a new service with CI, docs, and a
    runbook.
-3. GitOps deployment with Argo CD.
-4. AWS infrastructure in Terraform.
+4. GitOps deployment with Argo CD.
+5. AWS infrastructure in Terraform.
