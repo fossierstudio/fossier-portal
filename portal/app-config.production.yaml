@@ -12,12 +12,11 @@ backend:
   # reachable not just from within the backend host, but from all of your
   # callers.
   baseUrl: ${PORTAL_BASE_URL}
-  # Inside the container this binds all interfaces. deploy/docker-compose.yml
-  # decides which host address publishes the port.
+  # Inside the container this binds all interfaces. The port is not published:
+  # the tunnel container in deploy/docker-compose.yml is the only way in.
   listen: ':7007'
   csp:
-    # The demo is served over plain HTTP on the LAN.
-    upgrade-insecure-requests: false
+    connect-src: ["'self'"]
   cors:
     origin: ${PORTAL_BASE_URL}
     methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
@@ -35,8 +34,9 @@ backend:
 auth:
   environment: production
   providers:
-    # Guest sign-in keeps the demo friction-free. The port is only published to
-    # the LAN, so this must be replaced before the portal goes on the internet.
+    # Visitors go straight in as guests. This is safe only because
+    # packages/backend/src/readOnlyPolicy.ts limits every user to reading public
+    # content, and the backend has no plugins that can change anything.
     guest:
       dangerouslyAllowOutsideDevelopment: true
 
@@ -52,7 +52,7 @@ techdocs:
 
 catalog:
   rules:
-    - allow: [Component, System, API, Resource, Location, Domain, Group, User, Template]
+    - allow: [Component, System, API, Resource, Location, Domain, Group, User]
   locations:
     # File locations are relative to the backend process, which is /app in the image.
     - type: file

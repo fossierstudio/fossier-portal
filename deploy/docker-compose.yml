@@ -9,6 +9,8 @@ services:
     environment:
       POSTGRES_USER: backstage
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+    networks:
+      - private
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -31,12 +33,44 @@ services:
       POSTGRES_PORT: 5432
       POSTGRES_USER: backstage
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
-    ports:
-      - ${PORTAL_BIND:?set in .env}:7007:7007
+    # No published port and no route out of the private network, so a compromised
+    # portal can't reach the host's LAN, the k3s cluster, or the internet.
+    networks:
+      - private
     volumes:
       - techdocs-data:/app/techdocs
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     mem_limit: 1536m
     cpus: 2
+
+  # The portal's only way in. It has its own tunnel, so it can be stopped to take
+  # the portal offline without touching the host's other tunnel.
+  tunnel:
+    image: cloudflare/cloudflared:2026.7.1
+    restart: unless-stopped
+    depends_on:
+      - portal
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set in .env}
+    networks:
+      - private
+      - public
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.5
+
+networks:
+  private:
+    internal: true
+  public:
 
 volumes:
   postgres-data:

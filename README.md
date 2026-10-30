@@ -42,22 +42,26 @@ covers how these systems are built and operated.
 
 ```mermaid
 flowchart LR
-    browser[Browser] --> portal
+    browser[Browser] -->|HTTPS| cloudflare[Cloudflare]
+    cloudflare --> tunnel
     subgraph host[Linux host]
         subgraph stack[backstage-demo Compose project]
+            tunnel[Tunnel container]
             portal[Backstage<br/>frontend and backend]
             postgres[(Postgres)]
             techdocs[(TechDocs volume)]
         end
     end
     catalog[portal/catalog<br/>YAML and Markdown] -->|built into image| portal
+    tunnel --> portal
     portal --> postgres
     portal --> techdocs
 ```
 
 The portal shares a host with other workloads, including a k3s cluster. It runs
-separately from that cluster, so a change here can't affect them. The reasons
-behind this and other choices are in the [decision log](docs/decisions.md).
+separately from that cluster, so a change here can't affect them, and it reaches
+the internet only through its own Cloudflare Tunnel. The reasons behind this and
+other choices are in the [decision log](docs/decisions.md).
 
 ## Run it
 
@@ -67,8 +71,9 @@ Build the image from `portal/`:
 docker build -t fossier-portal:latest portal
 ```
 
-Copy `deploy/.env.example` to `deploy/.env`, then set a password and the host
-address. Start the stack from `deploy/`:
+Create a Cloudflare Tunnel that points your hostname at `http://portal:7007`.
+Copy `deploy/.env.example` to `deploy/.env`, then set the public URL, a password,
+and the tunnel token. Start the stack from `deploy/`:
 
 ```bash
 docker compose up -d
@@ -76,19 +81,22 @@ docker compose up -d
 
 ## Security
 
-- Guest sign-in is on, and the port is published to a private network only.
-  Guest sign-in needs replacing before this goes on the internet.
+- **Open and read-only.** Visitors go straight in as guests. A
+  [permission policy](portal/packages/backend/src/readOnlyPolicy.ts) denies every
+  user action except reading, and the plugins that could change anything aren't
+  installed, so the rule holds at the API as well as in the interface.
+- **No way in except the tunnel.** The host publishes no ports for this stack,
+  and its home network address stays hidden behind Cloudflare.
+- **No way out.** The portal and Postgres sit on a private Docker network with no
+  route to the host's LAN, the k3s cluster, or the internet.
 - Secrets live in `deploy/.env`, which is gitignored.
-- This public repo leaves out paths to private source repos.
-- The portal is read-only: the tools for creating or importing software are
-  turned off.
+- This public repo leaves out paths to private source repos, and the portal shows
+  nothing that isn't already in it.
 
 ## What's next
 
-1. Run the portal publicly at its own address, with HTTPS, real sign-in in place
-   of guest access, and a privacy review of what the catalog exposes.
-2. Live CI and Kubernetes status on each catalog page.
-3. Self-service templates that create a new service with CI, docs, and a
-   runbook.
-4. GitOps deployment with Argo CD.
-5. AWS infrastructure in Terraform.
+1. Live CI and Kubernetes status on each catalog page.
+2. Self-service templates that create a new service with CI, docs, and a
+   runbook, with real sign-in for anyone who can use them.
+3. GitOps deployment with Argo CD.
+4. AWS infrastructure in Terraform.
