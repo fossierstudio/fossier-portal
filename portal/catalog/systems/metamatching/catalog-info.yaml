@@ -1,0 +1,48 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: metamatching
+  title: MetaMatching
+  description: Real-time, three-player experiment platform for a PhD dissertation.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://metamatching.sirbrobot.com/
+      title: Website
+    - url: https://fossier.studio/projects/metamatching/
+      title: Case study
+  tags:
+    - research
+spec:
+  owner: fossier-studio
+  domain: studio-products
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: metamatching-app
+  title: MetaMatching app
+  description: Node.js, Express, and Socket.IO service run under hardened systemd.
+  annotations:
+    github.com/project-slug: fossierstudio/MetaMatching
+  tags:
+    - javascript
+    - socket-io
+spec:
+  type: service
+  lifecycle: production
+  owner: fossier-studio
+  system: metamatching
+  dependsOn:
+    - resource:default/metamatching-mongodb
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: metamatching-mongodb
+  title: MetaMatching MongoDB
+  description: Experiment sessions and per-round data.
+spec:
+  type: database
+  owner: fossier-studio
+  system: metamatching

@@ -1,0 +1,79 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: canopy
+  title: Canopy
+  description: Staff scheduling for small counseling practices.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://canopystaff.com/
+      title: Website
+    - url: https://fossier.studio/projects/canopy/
+      title: Case study
+  tags:
+    - saas
+spec:
+  owner: fossier-studio
+  domain: studio-products
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: canopy-web
+  title: Canopy web
+  description: Next.js web app.
+  tags:
+    - nextjs
+    - typescript
+spec:
+  type: website
+  lifecycle: production
+  owner: fossier-studio
+  system: canopy
+  dependsOn:
+    - component:default/canopy-core
+    - resource:default/canopy-supabase
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: canopy-mobile
+  title: Canopy mobile
+  description: Expo app for iOS and Android.
+  tags:
+    - expo
+    - typescript
+spec:
+  type: app
+  lifecycle: production
+  owner: fossier-studio
+  system: canopy
+  dependsOn:
+    - component:default/canopy-core
+    - resource:default/canopy-supabase
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: canopy-core
+  title: Canopy core
+  description: Code shared by the web and mobile apps.
+  tags:
+    - typescript
+spec:
+  type: library
+  lifecycle: production
+  owner: fossier-studio
+  system: canopy
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: canopy-supabase
+  title: Canopy Supabase
+  description: Self-hosted Supabase on single-node k3s.
+spec:
+  type: database
+  owner: fossier-studio
+  system: canopy

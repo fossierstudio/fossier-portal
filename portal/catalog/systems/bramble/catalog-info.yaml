@@ -1,0 +1,77 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: bramble
+  title: Bramble
+  description: Community platform with real-time chat, voice, video, and screen share.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://bramble.gg/
+      title: Website
+    - url: https://fossier.studio/projects/bramble/
+      title: Case study
+  tags:
+    - real-time
+spec:
+  owner: fossier-studio
+  domain: studio-products
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: bramble-server
+  title: Bramble server
+  description: Fastify API and WebSocket gateway with a mediasoup SFU for voice.
+  tags:
+    - typescript
+    - websockets
+    - mediasoup
+spec:
+  type: service
+  lifecycle: production
+  owner: fossier-studio
+  system: bramble
+  dependsOn:
+    - resource:default/bramble-postgres
+    - resource:default/bramble-redis
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: bramble-clients
+  title: Bramble clients
+  description: Web, iPhone, and desktop apps.
+  tags:
+    - typescript
+    - react-native
+    - electron
+spec:
+  type: app
+  lifecycle: production
+  owner: fossier-studio
+  system: bramble
+  dependsOn:
+    - component:default/bramble-server
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bramble-postgres
+  title: Bramble Postgres
+  description: Primary Postgres 16 database.
+spec:
+  type: database
+  owner: fossier-studio
+  system: bramble
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bramble-redis
+  title: Bramble Redis
+  description: Presence and the event bus.
+spec:
+  type: cache
+  owner: fossier-studio
+  system: bramble

@@ -1,0 +1,4 @@
+deploy/.env
+
+# Parked until the self-service templates are finished.
+portal/catalog/templates/

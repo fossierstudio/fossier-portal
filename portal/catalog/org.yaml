@@ -1,0 +1,44 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: fossier-studio
+  title: Fossier Studio
+  description: Independent software studio.
+  links:
+    - url: https://fossier.studio/
+      title: Website
+    - url: https://fossier.studio/engineering/
+      title: Engineering
+spec:
+  type: organization
+  children: []
+  members:
+    - andrew-fossier
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: andrew-fossier
+spec:
+  profile:
+    displayName: Andrew Fossier
+  memberOf:
+    - fossier-studio
+---
+# Backstage resolves guest sign-ins to this exact user.
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: guest
+  namespace: development
+spec:
+  memberOf: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: studio-products
+  title: Studio Products
+  description: Products built and operated by Fossier Studio.
+spec:
+  owner: fossier-studio

@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: fossier-studio
+  description: Every entity in the Fossier Studio catalog.
+spec:
+  targets:
+    - ./org.yaml
+    - ./systems/mycel/catalog-info.yaml
+    - ./systems/bramble/catalog-info.yaml
+    - ./systems/canopy/catalog-info.yaml
+    - ./systems/metamatching/catalog-info.yaml

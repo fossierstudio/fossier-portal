@@ -1,0 +1,5 @@
+site_name: MetaMatching
+plugins:
+  - techdocs-core
+nav:
+  - Overview: index.md

@@ -1,0 +1,5 @@
+site_name: Mycel
+plugins:
+  - techdocs-core
+nav:
+  - Overview: index.md

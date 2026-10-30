@@ -1,0 +1,43 @@
+# Keeps the portal in its own Compose project, network, and volumes. It shares
+# nothing with the other workloads on the host.
+name: backstage-demo
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: backstage
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U backstage']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    mem_limit: 512m
+    cpus: 1
+
+  portal:
+    image: fossier-portal:${PORTAL_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORTAL_BASE_URL: ${PORTAL_BASE_URL:?set in .env}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: backstage
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+    ports:
+      - ${PORTAL_BIND:?set in .env}:7007:7007
+    volumes:
+      - techdocs-data:/app/techdocs
+    mem_limit: 1536m
+    cpus: 2
+
+volumes:
+  postgres-data:
+  techdocs-data:

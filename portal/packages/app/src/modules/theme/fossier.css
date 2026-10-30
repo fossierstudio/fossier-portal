@@ -1,0 +1,59 @@
+/* Home page system map: the branches grow out from the studio mark once. */
+.fossier-branch {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  animation: fossier-grow 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fossier-grow {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fossier-branch {
+    animation: none;
+  }
+}
+
+/* Maps Backstage UI tokens onto the fossier.studio palette and typefaces. */
+[data-theme-mode='dark'] {
+  --bui-font-regular: 'Inter Variable', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
+  --bui-font-monospace: 'JetBrains Mono Variable', 'Fira Code', monospace;
+
+  --bui-bg-app: #000000;
+  --bui-bg-neutral-1: #0d090b;
+  --bui-bg-neutral-1-hover: #160f13;
+  --bui-bg-neutral-1-pressed: #20171c;
+  --bui-bg-neutral-2: #160f13;
+  --bui-bg-neutral-2-hover: #20171c;
+  --bui-bg-neutral-2-pressed: #2b2026;
+  --bui-bg-neutral-3: #20171c;
+  --bui-bg-neutral-3-hover: #2b2026;
+  --bui-bg-neutral-3-pressed: #372a31;
+  --bui-bg-neutral-4: #2b2026;
+  --bui-bg-neutral-4-hover: #372a31;
+  --bui-bg-neutral-4-pressed: #44353d;
+  --bui-bg-solid: #ff6ec7;
+  --bui-bg-solid-hover: #ff82d0;
+  --bui-bg-solid-pressed: #ffb3e6;
+
+  --bui-fg-primary: #efe9ed;
+  --bui-fg-secondary: #aaa0a7;
+  --bui-fg-solid: #12000b;
+
+  --bui-border-1: #2b2026;
+  --bui-border-2: #44353d;
+}
+
+/* Keep catalog names whole instead of breaking them mid-word. */
+.MuiTableCell-root a {
+  word-break: normal;
+  overflow-wrap: normal;
+}

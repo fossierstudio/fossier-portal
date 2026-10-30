@@ -1,0 +1,92 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: mycel
+  title: Mycel
+  description: GitHub Actions monitoring with on-device AI failure analysis.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://mycel.live/
+      title: Website
+    - url: https://fossier.studio/projects/mycel/
+      title: Case study
+  tags:
+    - developer-tools
+    - ci-cd
+spec:
+  owner: fossier-studio
+  domain: studio-products
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mycel-apple
+  title: Mycel for Apple platforms
+  description: macOS menu bar app with iOS companion and widgets.
+  tags:
+    - swift
+spec:
+  type: app
+  lifecycle: production
+  owner: fossier-studio
+  system: mycel
+  dependsOn:
+    - component:default/mycel-push
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mycel-android
+  title: Mycel for Android
+  description: Android companion app.
+  tags:
+    - kotlin
+spec:
+  type: app
+  lifecycle: production
+  owner: fossier-studio
+  system: mycel
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mycel-windows
+  title: Mycel for Windows
+  description: Windows app, in progress.
+  tags:
+    - csharp
+spec:
+  type: app
+  lifecycle: experimental
+  owner: fossier-studio
+  system: mycel
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mycel-web
+  title: mycel.live
+  description: Marketing site.
+  tags:
+    - astro
+spec:
+  type: website
+  lifecycle: production
+  owner: fossier-studio
+  system: mycel
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mycel-push
+  title: Mycel push relay
+  description: Cloudflare Worker that sends notifications through APNs.
+  tags:
+    - typescript
+    - cloudflare-workers
+spec:
+  type: service
+  lifecycle: production
+  owner: fossier-studio
+  system: mycel

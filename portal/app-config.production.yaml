@@ -1,0 +1,59 @@
+app:
+  title: Fossier Studio Portal
+  # Should be the same as backend.baseUrl when using the `app-backend` plugin.
+  baseUrl: ${PORTAL_BASE_URL}
+
+organization:
+  name: Fossier Studio
+
+backend:
+  # Note that the baseUrl should be the URL that the browser and other clients
+  # should use when communicating with the backend, i.e. it needs to be
+  # reachable not just from within the backend host, but from all of your
+  # callers.
+  baseUrl: ${PORTAL_BASE_URL}
+  # Inside the container this binds all interfaces. deploy/docker-compose.yml
+  # decides which host address publishes the port.
+  listen: ':7007'
+  csp:
+    # The demo is served over plain HTTP on the LAN.
+    upgrade-insecure-requests: false
+  cors:
+    origin: ${PORTAL_BASE_URL}
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+
+  # config options: https://node-postgres.com/apis/client
+  database:
+    client: pg
+    connection:
+      host: ${POSTGRES_HOST}
+      port: ${POSTGRES_PORT}
+      user: ${POSTGRES_USER}
+      password: ${POSTGRES_PASSWORD}
+
+auth:
+  environment: production
+  providers:
+    # Guest sign-in keeps the demo friction-free. The port is only published to
+    # the LAN, so this must be replaced before the portal goes on the internet.
+    guest:
+      dangerouslyAllowOutsideDevelopment: true
+
+techdocs:
+  builder: 'local'
+  generator:
+    # mkdocs is installed in the image, so no Docker socket is needed.
+    runIn: 'local'
+  publisher:
+    type: 'local'
+    local:
+      publishDirectory: /app/techdocs
+
+catalog:
+  rules:
+    - allow: [Component, System, API, Resource, Location, Domain, Group, User, Template]
+  locations:
+    # File locations are relative to the backend process, which is /app in the image.
+    - type: file
+      target: ./catalog/all.yaml
