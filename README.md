@@ -4,6 +4,9 @@ A [Backstage](https://backstage.io/) developer portal for the products I build
 and run at [Fossier Studio](https://fossier.studio/projects/). It puts every
 system, its components, its owner, and its docs in one place.
 
+**Live at [portal.fossier.studio](https://portal.fossier.studio/).** No sign-in
+needed. It runs on a home server, so it may occasionally be offline.
+
 ![The portal home page, showing a map of four systems and their components](docs/images/home.png)
 
 ## What's in the catalog
