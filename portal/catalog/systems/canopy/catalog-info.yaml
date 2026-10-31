@@ -11,6 +11,8 @@ metadata:
       title: Website
     - url: https://fossier.studio/projects/canopy/
       title: Case study
+    - url: https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/canopy/
+      title: Catalog definition
   tags:
     - saas
 spec:
@@ -26,6 +28,8 @@ metadata:
   tags:
     - nextjs
     - typescript
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/canopy/
 spec:
   type: website
   lifecycle: production
@@ -44,6 +48,8 @@ metadata:
   tags:
     - expo
     - typescript
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/canopy/
 spec:
   type: app
   lifecycle: production
@@ -61,6 +67,8 @@ metadata:
   description: Code shared by the web and mobile apps.
   tags:
     - typescript
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/canopy/
 spec:
   type: library
   lifecycle: production
@@ -73,6 +81,8 @@ metadata:
   name: canopy-supabase
   title: Canopy Supabase
   description: Self-hosted Supabase on single-node k3s.
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/canopy/
 spec:
   type: database
   owner: fossier-studio

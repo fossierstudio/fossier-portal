@@ -11,6 +11,8 @@ metadata:
       title: Website
     - url: https://fossier.studio/projects/metamatching/
       title: Case study
+    - url: https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/metamatching/
+      title: Catalog definition
   tags:
     - research
 spec:
@@ -24,6 +26,7 @@ metadata:
   title: MetaMatching app
   description: Node.js, Express, and Socket.IO service run under hardened systemd.
   annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/metamatching/
     github.com/project-slug: fossierstudio/MetaMatching
   tags:
     - javascript
@@ -42,6 +45,8 @@ metadata:
   name: metamatching-mongodb
   title: MetaMatching MongoDB
   description: Experiment sessions and per-round data.
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/metamatching/
 spec:
   type: database
   owner: fossier-studio

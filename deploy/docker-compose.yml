@@ -1,5 +1,5 @@
-# Keeps the portal in its own Compose project, network, and volumes. It shares
-# nothing with the other workloads on the host.
+# Keeps the portal in its own Compose project, networks, and volumes, apart from
+# the other workloads on the host.
 name: backstage-demo
 
 services:
@@ -34,11 +34,21 @@ services:
       POSTGRES_USER: backstage
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
     # No published port and no route out of the private network, so a compromised
-    # portal can't reach the host's LAN, the k3s cluster, or the internet.
+    # portal can't reach the host, its LAN, the k3s cluster, or the internet.
     networks:
       - private
     volumes:
       - techdocs-data:/app/techdocs
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:7007/.backstage/health/v1/readiness').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 60s
     cap_drop:
       - ALL
     security_opt:
@@ -52,7 +62,8 @@ services:
     image: cloudflare/cloudflared:2026.7.1
     restart: unless-stopped
     depends_on:
-      - portal
+      portal:
+        condition: service_healthy
     command: tunnel --no-autoupdate run
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set in .env}
@@ -70,6 +81,9 @@ services:
 networks:
   private:
     internal: true
+    # Docker otherwise gives containers on this network a path to host ports.
+    driver_opts:
+      com.docker.network.bridge.gateway_mode_ipv4: isolated
   public:
 
 volumes:

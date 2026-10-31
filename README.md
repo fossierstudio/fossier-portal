@@ -4,6 +4,9 @@ A [Backstage](https://backstage.io/) developer portal for the products I build
 and run at [Fossier Studio](https://fossier.studio/projects/). It puts every
 system, its components, its owner, and its docs in one place.
 
+I built this solo over a weekend to bring my four products into one catalog and
+to get hands-on with Backstage by running it for real.
+
 **Live at [portal.fossier.studio](https://portal.fossier.studio/).** No sign-in
 needed. It runs on a home server, so it may occasionally be offline.
 
@@ -30,12 +33,13 @@ covers how these systems are built and operated.
 - **Docs next to the catalog.** Each system has TechDocs, built by Backstage
   inside the container, with no separate docs pipeline.
 - **A custom frontend.** The home page is a React page in Backstage's new
-  frontend system that draws the system map from live catalog data. The theme
-  matches the studio's site.
-- **Repeatable deployment.** A multi-stage Dockerfile and Docker Compose stack
-  run with memory and CPU limits, in their own network, next to other workloads.
-- **CI on every change.** [GitHub Actions](.github/workflows/ci.yml) type-checks
-  and builds the production image, and validates the Compose file.
+  frontend system that draws the system map from the catalog API, so it follows
+  the catalog as entries change. The theme matches the studio's site.
+- **Repeatable deployment.** A multi-stage Dockerfile, a Docker Compose stack
+  with memory and CPU limits, and a [deploy script](deploy/deploy.sh) that keeps
+  the previous image for rollback.
+- **CI on every change.** [GitHub Actions](.github/workflows/ci.yml) runs lint and
+  tests, builds the production image, and validates the Compose file.
 
 | Catalog | System page | Docs |
 |---|---|---|
@@ -82,16 +86,23 @@ and the tunnel token. Start the stack from `deploy/`:
 docker compose up -d
 ```
 
+To update a running host, build here and ship the image with:
+
+```bash
+deploy/deploy.sh <ssh-host>
+```
+
 ## Security
 
 - **Open and read-only.** Visitors go straight in as guests. A
   [permission policy](portal/packages/backend/src/readOnlyPolicy.ts) denies every
-  user action except reading, and the plugins that could change anything aren't
-  installed, so the rule holds at the API as well as in the interface.
+  user action except reading, so the rule holds at the API as well as in the
+  interface. The scaffolder and other plugins that act on outside systems aren't
+  installed.
 - **No way in except the tunnel.** The host publishes no ports for this stack,
   and its home network address stays hidden behind Cloudflare.
 - **No way out.** The portal and Postgres sit on a private Docker network with no
-  route to the host's LAN, the k3s cluster, or the internet.
+  route to the host, its LAN, the k3s cluster, or the internet.
 - Secrets live in `deploy/.env`, which is gitignored.
 - This public repo leaves out paths to private source repos, and the portal shows
   nothing that isn't already in it.

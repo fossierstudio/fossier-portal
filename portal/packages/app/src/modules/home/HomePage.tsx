@@ -89,9 +89,10 @@ export const HomePage = () => {
       <h1 className={classes.headline}>Welcome Backstage</h1>
       {systems && (
         <p className={classes.summary}>
-          {systems.length} systems and {componentCount} components, each with an
-          owner and docs. Bramble alone has shipped 480 production deploys since
-          March 2026, with a median of 6 minutes from push to live.
+          {systems.length} systems and {componentCount} components. Every
+          component has an owner, and every system has docs. Bramble alone has
+          shipped 480 production deploys since March 2026, with a median of 6
+          minutes from push to live.
         </p>
       )}
       <div className={classes.map}>

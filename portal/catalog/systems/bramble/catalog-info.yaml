@@ -11,6 +11,8 @@ metadata:
       title: Website
     - url: https://fossier.studio/projects/bramble/
       title: Case study
+    - url: https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/bramble/
+      title: Catalog definition
   tags:
     - real-time
 spec:
@@ -27,6 +29,8 @@ metadata:
     - typescript
     - websockets
     - mediasoup
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/bramble/
 spec:
   type: service
   lifecycle: production
@@ -46,6 +50,8 @@ metadata:
     - typescript
     - react-native
     - electron
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/bramble/
 spec:
   type: app
   lifecycle: production
@@ -60,6 +66,8 @@ metadata:
   name: bramble-postgres
   title: Bramble Postgres
   description: Primary Postgres 16 database.
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/bramble/
 spec:
   type: database
   owner: fossier-studio
@@ -71,6 +79,8 @@ metadata:
   name: bramble-redis
   title: Bramble Redis
   description: Presence and the event bus.
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/bramble/
 spec:
   type: cache
   owner: fossier-studio

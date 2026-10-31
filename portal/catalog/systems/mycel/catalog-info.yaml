@@ -11,6 +11,8 @@ metadata:
       title: Website
     - url: https://fossier.studio/projects/mycel/
       title: Case study
+    - url: https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/mycel/
+      title: Catalog definition
   tags:
     - developer-tools
     - ci-cd
@@ -26,6 +28,8 @@ metadata:
   description: macOS menu bar app with iOS companion and widgets.
   tags:
     - swift
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/mycel/
 spec:
   type: app
   lifecycle: production
@@ -42,6 +46,8 @@ metadata:
   description: Android companion app.
   tags:
     - kotlin
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/mycel/
 spec:
   type: app
   lifecycle: production
@@ -56,6 +62,8 @@ metadata:
   description: Windows app, in progress.
   tags:
     - csharp
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/mycel/
 spec:
   type: app
   lifecycle: experimental
@@ -70,6 +78,8 @@ metadata:
   description: Marketing site.
   tags:
     - astro
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/mycel/
 spec:
   type: website
   lifecycle: production
@@ -85,6 +95,8 @@ metadata:
   tags:
     - typescript
     - cloudflare-workers
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/mycel/
 spec:
   type: service
   lifecycle: production
