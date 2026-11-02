@@ -32,6 +32,10 @@ covers how these systems are built and operated.
   other change.
 - **Docs next to the catalog.** Each system has TechDocs, built by Backstage
   inside the container, with no separate docs pipeline.
+- **APIs in the catalog.** Bramble's REST API (OpenAPI, 152 operations) and its
+  WebSocket gateway (AsyncAPI) are API entities, linked to the server that
+  provides them and the clients that use them. The REST spec is generated from
+  the server's own route schemas rather than written by hand.
 - **A custom frontend.** The home page is a React page in Backstage's new
   frontend system that draws the system map from the catalog API, so it follows
   the catalog as entries change. The theme matches the studio's site.
@@ -41,9 +45,9 @@ covers how these systems are built and operated.
 - **CI on every change.** [GitHub Actions](.github/workflows/ci.yml) runs lint and
   tests, builds the production image, and validates the Compose file.
 
-| Catalog | System page | Docs |
-|---|---|---|
-| ![Catalog table](docs/images/catalog.png) | ![Bramble system page](docs/images/system.png) | ![Bramble docs](docs/images/docs.png) |
+| Catalog | System page | Docs | API |
+|---|---|---|---|
+| ![Catalog table](docs/images/catalog.png) | ![Bramble system page](docs/images/system.png) | ![Bramble docs](docs/images/docs.png) | ![Bramble REST API](docs/images/api.png) |
 
 ## How it fits together
 
@@ -86,7 +90,7 @@ and the tunnel token. Start the stack from `deploy/`:
 docker compose up -d
 ```
 
-To update a running host, build here and ship the image with:
+To update a running host, send the source and build the image there with:
 
 ```bash
 deploy/deploy.sh <ssh-host>

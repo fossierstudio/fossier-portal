@@ -1,0 +1,417 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: bramble-gateway
+  title: Bramble WebSocket gateway
+  description: Real-time events, presence, typing, and voice signaling over one socket.
+  tags:
+    - websockets
+    - asyncapi
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/bramble/apis/
+spec:
+  type: asyncapi
+  lifecycle: production
+  owner: fossier-studio
+  system: bramble
+  definition: |
+    asyncapi: 2.6.0
+    info:
+      title: Bramble WebSocket gateway
+      version: 1.0.0
+      description: |
+        Real-time events for Bramble clients. Every frame is a JSON envelope
+        with op (the opcode), d (the payload), and, on dispatches, t and s (the
+        event name and sequence number).
+
+        A session opens with HELLO, then the client sends IDENTIFY with its JWT and
+        heartbeats on the interval HELLO gives. Voice in larger rooms runs through
+        a mediasoup SFU, signaled over op 15. If another instance owns the room,
+        the server answers with op 16 and the client reconnects there.
+
+        Close codes: 4000 unknown error, 4001 unknown opcode, 4002 decode error,
+        4003 not authenticated, 4004 authentication failed, 4005 already
+        authenticated, 4006 invalid sequence, 4007 rate limited, 4008 session timed
+        out, 4009 session replaced, 4010 server full, 4011 invalid API version,
+        4012 account terminated.
+    servers:
+      production:
+        url: bramble.gg/gateway
+        protocol: wss
+    channels:
+      /gateway:
+        publish:
+          summary: Frames the client sends.
+          message:
+            oneOf:
+              - $ref: '#/components/messages/Heartbeat'
+              - $ref: '#/components/messages/Identify'
+              - $ref: '#/components/messages/StatusUpdate'
+              - $ref: '#/components/messages/ChannelSubscribe'
+              - $ref: '#/components/messages/ChannelUnsubscribe'
+              - $ref: '#/components/messages/Resume'
+              - $ref: '#/components/messages/RequestMembers'
+              - $ref: '#/components/messages/Typing'
+              - $ref: '#/components/messages/VoiceStateUpdate'
+              - $ref: '#/components/messages/VoiceSignal'
+              - $ref: '#/components/messages/VoiceSfu'
+              - $ref: '#/components/messages/DmCall'
+              - $ref: '#/components/messages/AppState'
+        subscribe:
+          summary: Frames the server sends.
+          message:
+            oneOf:
+              - $ref: '#/components/messages/Hello'
+              - $ref: '#/components/messages/HeartbeatAck'
+              - $ref: '#/components/messages/Dispatch'
+              - $ref: '#/components/messages/Reconnect'
+              - $ref: '#/components/messages/InvalidSession'
+              - $ref: '#/components/messages/VoiceSfuRedirect'
+    components:
+      messages:
+        Hello:
+          name: HELLO
+          summary: First frame on a new connection (op 10).
+          payload:
+            $ref: '#/components/schemas/Hello'
+        Heartbeat:
+          name: HEARTBEAT
+          summary: Keeps the session alive (op 1).
+          payload:
+            $ref: '#/components/schemas/Heartbeat'
+        HeartbeatAck:
+          name: HEARTBEAT_ACK
+          summary: Server reply to a heartbeat (op 11).
+          payload:
+            $ref: '#/components/schemas/HeartbeatAck'
+        Identify:
+          name: IDENTIFY
+          summary: Authenticates the session with a JWT (op 2).
+          payload:
+            $ref: '#/components/schemas/Identify'
+        Resume:
+          name: RESUME
+          summary: Replays missed dispatches after a dropped connection (op 6).
+          payload:
+            $ref: '#/components/schemas/Resume'
+        StatusUpdate:
+          name: STATUS_UPDATE
+          summary: Sets the user's presence (op 3).
+          payload:
+            $ref: '#/components/schemas/StatusUpdate'
+        ChannelSubscribe:
+          name: CHANNEL_SUBSCRIBE
+          summary: Starts receiving a channel's events (op 4).
+          payload:
+            $ref: '#/components/schemas/ChannelSubscribe'
+        ChannelUnsubscribe:
+          name: CHANNEL_UNSUBSCRIBE
+          summary: Stops receiving a channel's events (op 5).
+          payload:
+            $ref: '#/components/schemas/ChannelUnsubscribe'
+        RequestMembers:
+          name: REQUEST_MEMBERS
+          summary: Asks for a server's member list in chunks (op 8).
+          payload:
+            $ref: '#/components/schemas/RequestMembers'
+        Typing:
+          name: TYPING
+          summary: Shows a typing indicator (op 12).
+          payload:
+            $ref: '#/components/schemas/Typing'
+        VoiceStateUpdate:
+          name: VOICE_STATE_UPDATE
+          summary: Joins, leaves, mutes, or deafens in voice (op 13).
+          payload:
+            $ref: '#/components/schemas/VoiceStateUpdate'
+        VoiceSignal:
+          name: VOICE_SIGNAL
+          summary: Peer-to-peer WebRTC signaling (op 14).
+          payload:
+            $ref: '#/components/schemas/VoiceSignal'
+        VoiceSfu:
+          name: VOICE_SFU
+          summary: mediasoup SFU signaling (op 15).
+          payload:
+            $ref: '#/components/schemas/VoiceSfu'
+        VoiceSfuRedirect:
+          name: VOICE_SFU_REDIRECT
+          summary: The room lives on another instance; reconnect there (op 16).
+          payload:
+            $ref: '#/components/schemas/VoiceSfuRedirect'
+        DmCall:
+          name: DM_CALL
+          summary: Direct-message call signaling (op 17).
+          payload:
+            $ref: '#/components/schemas/DmCall'
+        AppState:
+          name: APP_STATE
+          summary: Foreground or background, which decides push delivery (op 18).
+          payload:
+            $ref: '#/components/schemas/AppState'
+        Reconnect:
+          name: RECONNECT
+          summary: The server asks the client to reconnect and resume (op 7).
+          payload:
+            $ref: '#/components/schemas/Reconnect'
+        InvalidSession:
+          name: INVALID_SESSION
+          summary: The session can't be resumed; identify again (op 9).
+          payload:
+            $ref: '#/components/schemas/InvalidSession'
+        Dispatch:
+          name: DISPATCH
+          summary: A named event, such as a new message or presence change (op 0).
+          payload:
+            $ref: '#/components/schemas/Dispatch'
+      schemas:
+        Hello:
+          type: object
+          properties:
+            op: { const: 10 }
+            d:
+              type: object
+              properties:
+                heartbeat_interval: { type: integer, description: Milliseconds }
+        Heartbeat:
+          type: object
+          properties:
+            op: { const: 1 }
+        HeartbeatAck:
+          type: object
+          properties:
+            op: { const: 11 }
+        Identify:
+          type: object
+          properties:
+            op: { const: 2 }
+            d:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string, description: JWT access token }
+                client_type: { type: string, enum: [mobile, desktop, web] }
+        Resume:
+          type: object
+          properties:
+            op: { const: 6 }
+            d:
+              type: object
+              required: [session_id, token, seq]
+              properties:
+                session_id: { type: string }
+                token: { type: string }
+                seq: { type: integer, description: Last sequence number received }
+        StatusUpdate:
+          type: object
+          properties:
+            op: { const: 3 }
+            d:
+              type: object
+              properties:
+                status: { type: string, enum: [online, idle, dnd, offline] }
+        ChannelSubscribe:
+          type: object
+          properties:
+            op: { const: 4 }
+            d:
+              type: object
+              properties:
+                channel_id: { type: string, format: uuid }
+        ChannelUnsubscribe:
+          type: object
+          properties:
+            op: { const: 5 }
+            d:
+              type: object
+              properties:
+                channel_id: { type: string, format: uuid }
+        RequestMembers:
+          type: object
+          properties:
+            op: { const: 8 }
+            d:
+              type: object
+              properties:
+                server_id: { type: string, format: uuid }
+        Typing:
+          type: object
+          properties:
+            op: { const: 12 }
+            d:
+              type: object
+              properties:
+                channel_id: { type: string, format: uuid }
+        VoiceStateUpdate:
+          type: object
+          properties:
+            op: { const: 13 }
+            d:
+              type: object
+              properties:
+                server_id: { type: string, format: uuid }
+                channel_id: { type: [string, 'null'], format: uuid }
+                self_mute: { type: boolean }
+                self_deaf: { type: boolean }
+        VoiceSignal:
+          type: object
+          properties:
+            op: { const: 14 }
+            d:
+              type: object
+              properties:
+                target_user_id: { type: string, format: uuid }
+                type:
+                  {
+                    type: string,
+                    enum: [offer, answer, ice-candidate, renegotiate],
+                  }
+                sdp: { type: string }
+                candidate:
+                  type: object
+                  properties:
+                    candidate: { type: string }
+                    sdpMLineIndex: { type: [integer, 'null'] }
+                    sdpMid: { type: [string, 'null'] }
+        VoiceSfu:
+          type: object
+          properties:
+            op: { const: 15 }
+            d:
+              type: object
+              required: [type, channel_id]
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - get-capabilities
+                    - create-transport
+                    - connect-transport
+                    - produce
+                    - consume
+                    - resume-consumer
+                    - pause-producer
+                    - resume-producer
+                    - close-producer
+                    - request-sfu
+                    - release-sfu
+                    - echo-start
+                    - echo-stop
+                channel_id: { type: string, format: uuid }
+                direction: { type: string, enum: [send, recv] }
+                transport_id: { type: string }
+                kind: { type: string, enum: [audio, video] }
+                producer_id: { type: string }
+                consumer_id: { type: string }
+                source_type: { type: string, enum: [screen, camera] }
+                dtls_parameters: { description: mediasoup DTLS parameters }
+                rtp_parameters: { description: mediasoup RTP parameters }
+                rtp_capabilities: { description: mediasoup RTP capabilities }
+        VoiceSfuRedirect:
+          type: object
+          properties:
+            op: { const: 16 }
+            d:
+              type: object
+              properties:
+                channel_id: { type: string, format: uuid }
+                ws_endpoint:
+                  { type: string, description: Gateway URL of the owning instance }
+        DmCall:
+          type: object
+          properties:
+            op: { const: 17 }
+            d:
+              type: object
+              properties:
+                dm_channel_id: { type: string, format: uuid }
+                action: { type: string, enum: [offer, accept, reject, end] }
+                has_video: { type: boolean }
+        AppState:
+          type: object
+          properties:
+            op: { const: 18 }
+            d:
+              type: object
+              properties:
+                state: { type: string, enum: [foreground, background] }
+        Reconnect:
+          type: object
+          properties:
+            op: { const: 7 }
+        InvalidSession:
+          type: object
+          properties:
+            op: { const: 9 }
+        Dispatch:
+          type: object
+          properties:
+            op: { const: 0 }
+            s: { type: integer, description: Sequence number, used to resume }
+            t:
+              type: string
+              description: Event name. READY carries the user, servers, and channels.
+              enum:
+                - READY
+                - MEMBER_CHUNK
+                - SERVER_JOIN
+                - SERVER_LEAVE
+                - CHANNEL_CREATE
+                - CHANNEL_UPDATE
+                - CHANNEL_DELETE
+                - CHANNEL_CATEGORY_CREATE
+                - CHANNEL_CATEGORY_UPDATE
+                - CHANNEL_CATEGORY_DELETE
+                - CHANNEL_OVERWRITE_UPDATE
+                - CHANNEL_OVERWRITE_DELETE
+                - MESSAGE_CREATE
+                - MESSAGE_UPDATE
+                - MESSAGE_DELETE
+                - MESSAGE_DELETE_BULK
+                - MESSAGE_REACTION_ADD
+                - MESSAGE_REACTION_REMOVE
+                - MESSAGE_PIN_ADD
+                - MESSAGE_PIN_REMOVE
+                - TYPING_START
+                - PRESENCE_UPDATE
+                - USER_PROFILE_UPDATE
+                - MEMBER_UPDATE
+                - MEMBER_ROLE_UPDATE
+                - MEMBER_TIMEOUT
+                - MEMBER_BAN_ADD
+                - MEMBER_BAN_REMOVE
+                - ROLE_CREATE
+                - ROLE_UPDATE
+                - ROLE_DELETE
+                - SERVER_EMOJI_CREATE
+                - SERVER_EMOJI_DELETE
+                - FRIEND_REQUEST_CREATE
+                - FRIEND_REQUEST_ACCEPT
+                - FRIEND_REMOVE
+                - DM_CHANNEL_CREATE
+                - DM_MESSAGE_CREATE
+                - DM_MESSAGE_UPDATE
+                - DM_MESSAGE_DELETE
+                - DM_MESSAGE_REACTION_ADD
+                - DM_MESSAGE_REACTION_REMOVE
+                - DM_GROUP_UPDATE
+                - DM_GROUP_MEMBER_ADD
+                - DM_GROUP_MEMBER_REMOVE
+                - DM_GROUP_VOICE_MODE_CHANGE
+                - DM_GROUP_VOICE_STATE_UPDATE
+                - DM_CALL_OFFER
+                - DM_CALL_ACCEPT
+                - DM_CALL_REJECT
+                - DM_CALL_END
+                - VOICE_STATE_UPDATE
+                - VOICE_SIGNAL_RELAY
+                - VOICE_CHANNEL_INFO
+                - VOICE_CHANNEL_INFO_REFRESH
+                - VOICE_MODE_CHANGE
+                - VOICE_SFU_PRODUCER_CLOSED
+                - VOICE_INVITE_CREATE
+                - VOICE_INVITE_JOIN
+                - SYSTEM_BANNER_UPDATE
+                - REPORT_CREATED
+                - USER_WIPED
+            d: { description: Event payload; its shape depends on `t`. }

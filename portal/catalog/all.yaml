@@ -8,5 +8,7 @@ spec:
     - ./org.yaml
     - ./systems/mycel/catalog-info.yaml
     - ./systems/bramble/catalog-info.yaml
+    - ./systems/bramble/apis/rest-api.yaml
+    - ./systems/bramble/apis/gateway.yaml
     - ./systems/canopy/catalog-info.yaml
     - ./systems/metamatching/catalog-info.yaml

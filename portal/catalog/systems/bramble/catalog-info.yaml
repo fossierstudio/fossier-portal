@@ -36,6 +36,9 @@ spec:
   lifecycle: production
   owner: fossier-studio
   system: bramble
+  providesApis:
+    - bramble-rest-api
+    - bramble-gateway
   dependsOn:
     - resource:default/bramble-postgres
     - resource:default/bramble-redis
@@ -57,6 +60,9 @@ spec:
   lifecycle: production
   owner: fossier-studio
   system: bramble
+  consumesApis:
+    - bramble-rest-api
+    - bramble-gateway
   dependsOn:
     - component:default/bramble-server
 ---

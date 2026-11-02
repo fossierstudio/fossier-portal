@@ -1,0 +1,5332 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: bramble-rest-api
+  title: Bramble REST API
+  description: Accounts, servers, channels, messages, DMs, roles, moderation, and search.
+  tags:
+    - rest
+    - openapi
+  annotations:
+    backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/bramble/apis/
+spec:
+  type: openapi
+  lifecycle: production
+  owner: fossier-studio
+  system: bramble
+  definition: |
+    {
+      "openapi": "3.1.0",
+      "info": {
+        "title": "Bramble REST API",
+        "version": "1.0.0",
+        "description": "Client-facing REST API for Bramble, generated from the route schemas in the Bramble server. Admin and owner routes are left out. Real-time events go through the WebSocket gateway, which is its own API entity."
+      },
+      "servers": [
+        {
+          "url": "https://bramble.gg",
+          "description": "Production"
+        }
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "tags": [
+        {
+          "name": "Audit Log"
+        },
+        {
+          "name": "Auth"
+        },
+        {
+          "name": "Avatars"
+        },
+        {
+          "name": "Bramble"
+        },
+        {
+          "name": "Categories"
+        },
+        {
+          "name": "Channels"
+        },
+        {
+          "name": "Dm Channels"
+        },
+        {
+          "name": "Emojis"
+        },
+        {
+          "name": "Health"
+        },
+        {
+          "name": "Mentions"
+        },
+        {
+          "name": "Messages"
+        },
+        {
+          "name": "Moderation"
+        },
+        {
+          "name": "Og"
+        },
+        {
+          "name": "Onboarding"
+        },
+        {
+          "name": "Overwrites"
+        },
+        {
+          "name": "Pins"
+        },
+        {
+          "name": "Public"
+        },
+        {
+          "name": "Read State"
+        },
+        {
+          "name": "Reports"
+        },
+        {
+          "name": "Roles"
+        },
+        {
+          "name": "Search"
+        },
+        {
+          "name": "Servers"
+        },
+        {
+          "name": "Users"
+        },
+        {
+          "name": "Voice"
+        },
+        {
+          "name": "Voice Invites"
+        },
+        {
+          "name": "Waitlist"
+        },
+        {
+          "name": "Weather"
+        }
+      ],
+      "paths": {
+        "/api/health": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Health"]
+          }
+        },
+        "/api/health/ready": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Health"]
+          }
+        },
+        "/api/auth/register": {
+          "post": {
+            "summary": "Register a new account",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["username", "email", "password"],
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 32
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 255
+                      },
+                      "password": {
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 128
+                      },
+                      "displayName": {
+                        "type": "string",
+                        "maxLength": 64
+                      },
+                      "inviteCode": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "username": {
+                              "type": "string"
+                            },
+                            "email": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "displayName": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "emailVerified": {
+                              "type": "boolean"
+                            },
+                            "isGuest": {
+                              "type": "boolean"
+                            },
+                            "guestInvitedBy": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "isPlatformOwner": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "tokens": {
+                          "type": "object",
+                          "properties": {
+                            "accessToken": {
+                              "type": "string"
+                            },
+                            "refreshToken": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/auth/login": {
+          "post": {
+            "summary": "Login with username/email and password",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["identifier", "password"],
+                    "properties": {
+                      "identifier": {
+                        "type": "string",
+                        "description": "Username or email"
+                      },
+                      "password": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "username": {
+                              "type": "string"
+                            },
+                            "emailVerified": {
+                              "type": "boolean"
+                            },
+                            "isGuest": {
+                              "type": "boolean"
+                            },
+                            "isPlatformOwner": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "tokens": {
+                          "type": "object",
+                          "properties": {
+                            "accessToken": {
+                              "type": "string"
+                            },
+                            "refreshToken": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/auth/refresh": {
+          "post": {
+            "summary": "Refresh access token",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["refreshToken"],
+                    "properties": {
+                      "refreshToken": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string"
+                        },
+                        "refreshToken": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/auth/logout": {
+          "post": {
+            "summary": "Logout (revoke refresh token)",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["refreshToken"],
+                    "properties": {
+                      "refreshToken": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/me": {
+          "get": {
+            "summary": "Get current user profile",
+            "tags": ["Auth"],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "avatarUrl": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "bannerUrl": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "emailVerified": {
+                          "type": "boolean"
+                        },
+                        "isGuest": {
+                          "type": "boolean"
+                        },
+                        "guestInvitedBy": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "isPlatformOwner": {
+                          "type": "boolean"
+                        },
+                        "lastDesktopLoginAt": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "homeServerId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "bio": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "pronouns": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "statusText": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "statusEmoji": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "statusExpiresAt": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/auth/desktop-ping": {
+          "post": {
+            "summary": "Record desktop app activity for the current user",
+            "tags": ["Auth"],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/push-token": {
+          "put": {
+            "summary": "Register or clear the device push token",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "token": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 512
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/verify-email": {
+          "post": {
+            "summary": "Verify email address with verification code",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["code"],
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/resend-verification": {
+          "post": {
+            "summary": "Send email verification code",
+            "tags": ["Auth"],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/forgot-password": {
+          "post": {
+            "summary": "Request password reset token",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["email"],
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/reset-password": {
+          "post": {
+            "summary": "Reset password using emailed code",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["code", "newPassword"],
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      },
+                      "newPassword": {
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 128
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/restore-account": {
+          "post": {
+            "summary": "Cancel account deletion (within 30-day grace period)",
+            "tags": ["Auth"],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/convert-guest": {
+          "post": {
+            "summary": "Convert a guest account to a full account",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["email", "password"],
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 255
+                      },
+                      "password": {
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 128
+                      },
+                      "displayName": {
+                        "type": "string",
+                        "maxLength": 64
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/guest": {
+          "delete": {
+            "summary": "Delete a guest account (self-cleanup on leave)",
+            "tags": ["Auth"],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/auth/me/privacy": {
+          "get": {
+            "summary": "Get current user privacy settings",
+            "tags": ["Auth"],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "showLastSeen": {
+                          "type": "boolean"
+                        },
+                        "noiseSuppressionEnabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "patch": {
+            "summary": "Update current user privacy and voice settings",
+            "tags": ["Auth"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "showLastSeen": {
+                        "type": "boolean"
+                      },
+                      "noiseSuppressionEnabled": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "showLastSeen": {
+                          "type": "boolean"
+                        },
+                        "noiseSuppressionEnabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/users/me": {
+          "patch": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          },
+          "delete": {
+            "summary": "Delete account (30-day grace period)",
+            "tags": ["Users"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["password"],
+                    "properties": {
+                      "password": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "deleteScheduledAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/users/me/email": {
+          "patch": {
+            "summary": "Change email address (requires password confirmation)",
+            "tags": ["Users"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["password", "newEmail"],
+                    "properties": {
+                      "password": {
+                        "type": "string"
+                      },
+                      "newEmail": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/users/me/avatar": {
+          "post": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          },
+          "delete": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/users/me/banner": {
+          "post": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          },
+          "delete": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/users/{userId}": {
+          "get": {
+            "summary": "Get another user's public profile by id",
+            "tags": ["Users"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/avatars/badged/v3/{userId}.png": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Avatars"]
+          }
+        },
+        "/api/avatars/badged/{userId}.png": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Avatars"]
+          }
+        },
+        "/api/servers/": {
+          "post": {
+            "summary": "Create a new server",
+            "tags": ["Servers"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "description": {
+                        "type": "string",
+                        "maxLength": 1000
+                      },
+                      "isDiscoverable": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "201": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "iconUrl": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "ownerId": {
+                          "type": "string"
+                        },
+                        "memberCount": {
+                          "type": "number"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "get": {
+            "summary": "List servers the current user is a member of",
+            "tags": ["Servers"],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "memberCount": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}": {
+          "get": {
+            "summary": "Get server details (requires membership)",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "delete": {
+            "summary": "Delete a server (owner only)",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "patch": {
+            "summary": "Update server settings (requires MANAGE_SERVER)",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/join": {
+          "post": {
+            "summary": "Join a server via invite code",
+            "tags": ["Servers"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["code"],
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/invites": {
+          "post": {
+            "summary": "Create an invite code for a server",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/members/me": {
+          "delete": {
+            "summary": "Leave a server",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/members": {
+          "get": {
+            "summary": "List server members with live presence status",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "nickname": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "avatarUrl": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "bannerUrl": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "role": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "joinedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "lastSeenAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/servers/discover": {
+          "get": {
+            "summary": "Discover public servers (cursor-paginated)",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "query",
+                "name": "category",
+                "required": false
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "query",
+                "name": "cursor",
+                "required": false
+              },
+              {
+                "schema": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "in": "query",
+                "name": "limit",
+                "required": false
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/vanity-url": {
+          "put": {
+            "summary": "Set a custom vanity invite URL (requires MANAGE_SERVER)",
+            "tags": ["Servers"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["code"],
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/join/vanity/{code}": {
+          "post": {
+            "summary": "Join a server via vanity URL code",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "code",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/join/discover/{serverId}": {
+          "post": {
+            "summary": "Join a discoverable server directly by server ID",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/icon": {
+          "post": {
+            "summary": "Upload a server icon (multipart, requires MANAGE_SERVER)",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/banner": {
+          "post": {
+            "summary": "Upload a server banner (multipart, requires MANAGE_SERVER)",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/theme": {
+          "get": {
+            "summary": "Get the server theme (custom colors, background, font)",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "put": {
+            "summary": "Set/update the server theme (requires MANAGE_SERVER)",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "delete": {
+            "summary": "Remove the server theme (requires MANAGE_SERVER)",
+            "tags": ["Servers"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/channels/": {
+          "post": {
+            "summary": "Create a channel in a server",
+            "tags": ["Channels"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "text",
+                          "announcement",
+                          "voice",
+                          "forum",
+                          "rules",
+                          "bramble"
+                        ]
+                      },
+                      "topic": {
+                        "type": "string"
+                      },
+                      "categoryId": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "slowmodeSeconds": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "201": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "topic": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "isDefault": {
+                          "type": "boolean"
+                        },
+                        "position": {
+                          "type": "number"
+                        },
+                        "serverId": {
+                          "type": "string"
+                        },
+                        "categoryId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "slowmodeSeconds": {
+                          "type": "number"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "get": {
+            "summary": "List channels in a server",
+            "tags": ["Channels"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "position": {
+                            "type": "number"
+                          },
+                          "topic": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "isDefault": {
+                            "type": "boolean"
+                          },
+                          "categoryId": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "slowmodeSeconds": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}": {
+          "get": {
+            "summary": "Get a channel by ID",
+            "tags": ["Channels"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "patch": {
+            "summary": "Update a channel",
+            "tags": ["Channels"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "topic": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "delete": {
+            "summary": "Delete a channel",
+            "tags": ["Channels"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/channels/reorder": {
+          "patch": {
+            "summary": "Bulk reorder channels",
+            "tags": ["Channels"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["updates"],
+                    "properties": {
+                      "updates": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": ["id", "position"],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "position": {
+                              "type": "number"
+                            },
+                            "categoryId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "nullable": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/categories/": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Categories"]
+          },
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Categories"]
+          }
+        },
+        "/api/servers/{serverId}/categories/{categoryId}": {
+          "patch": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "categoryId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Categories"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "categoryId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Categories"]
+          }
+        },
+        "/api/servers/{serverId}/categories/{categoryId}/sync-permissions": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "categoryId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Categories"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/overwrites/": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Overwrites"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/overwrites/me/permissions": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Overwrites"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/overwrites/{targetId}": {
+          "put": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "targetId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Overwrites"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "targetId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Overwrites"]
+          }
+        },
+        "/api/servers/{serverId}/role-assignments/": {
+          "get": {
+            "summary": "Bulk-fetch all member→role assignments for a server",
+            "tags": ["Roles"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/roles/": {
+          "get": {
+            "summary": "List all roles for a server",
+            "tags": ["Roles"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "post": {
+            "summary": "Create a new role (requires MANAGE_ROLES)",
+            "tags": ["Roles"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                      },
+                      "color": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "permissions": {
+                        "type": "string",
+                        "description": "Bigint as string"
+                      },
+                      "position": {
+                        "type": "number"
+                      },
+                      "isMentionable": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/roles/assignments": {
+          "get": {
+            "summary": "Bulk-fetch all member→role assignments for a server",
+            "tags": ["Roles"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/roles/{roleId}": {
+          "get": {
+            "summary": "Get a role by ID",
+            "tags": ["Roles"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "roleId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "patch": {
+            "summary": "Update a role (requires MANAGE_ROLES)",
+            "tags": ["Roles"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "roleId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "delete": {
+            "summary": "Delete a role (requires MANAGE_ROLES)",
+            "tags": ["Roles"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "roleId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/members/{userId}/roles/": {
+          "get": {
+            "summary": "List a member's assigned roles",
+            "tags": ["Roles"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/members/{userId}/roles/{roleId}": {
+          "put": {
+            "summary": "Assign a role to a member (requires MANAGE_ROLES)",
+            "tags": ["Roles"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "roleId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "delete": {
+            "summary": "Remove a role from a member (requires MANAGE_ROLES)",
+            "tags": ["Roles"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "roleId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/members/{userId}": {
+          "delete": {
+            "summary": "Kick a member from the server (requires KICK_MEMBERS)",
+            "tags": ["Moderation"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/bans/{userId}": {
+          "put": {
+            "summary": "Ban a user from the server (requires BAN_MEMBERS)",
+            "tags": ["Moderation"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "delete": {
+            "summary": "Unban a user (requires BAN_MEMBERS)",
+            "tags": ["Moderation"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/bans": {
+          "get": {
+            "summary": "List server bans (requires BAN_MEMBERS)",
+            "tags": ["Moderation"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/members/{userId}/timeout": {
+          "patch": {
+            "summary": "Set or remove a member timeout (requires TIMEOUT_MEMBERS)",
+            "tags": ["Moderation"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/messages/bulk-delete": {
+          "post": {
+            "summary": "Bulk delete messages (requires MANAGE_MESSAGES)",
+            "tags": ["Moderation"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/members/{userId}/voice": {
+          "patch": {
+            "summary": "Server-mute, deafen, or disconnect a member from voice",
+            "tags": ["Voice", "Moderation"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "serverMute": {
+                        "type": "boolean"
+                      },
+                      "serverDeaf": {
+                        "type": "boolean"
+                      },
+                      "disconnect": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/messages/": {
+          "post": {
+            "summary": "Send a message to a channel",
+            "tags": ["Messages"],
+            "description": "Supports Idempotency-Key header to prevent duplicate sends on retry.",
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["content"],
+                    "properties": {
+                      "content": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "header",
+                "name": "idempotency-key",
+                "required": false,
+                "description": "Unique key for idempotent delivery"
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "201": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "serverId": {
+                          "type": "string"
+                        },
+                        "channelId": {
+                          "type": "string"
+                        },
+                        "authorId": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "editedAt": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "attachments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "mentions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "userId": {
+                                "type": "string"
+                              },
+                              "roleId": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "get": {
+            "summary": "Get message history (cursor-based pagination)",
+            "tags": ["Messages"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "query",
+                "name": "before",
+                "required": false,
+                "description": "Cursor: message ID to fetch before"
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "query",
+                "name": "limit",
+                "required": false,
+                "description": "Max messages to return (1-100, default 50)"
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "channelId": {
+                            "type": "string"
+                          },
+                          "author": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "avatarUrl": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          },
+                          "content": {
+                            "type": "string"
+                          },
+                          "editedAt": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "pinned": {
+                            "type": "boolean"
+                          },
+                          "reactions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "emoji": {
+                                  "type": "string"
+                                },
+                                "count": {
+                                  "type": "number"
+                                },
+                                "me": {
+                                  "type": "boolean"
+                                }
+                              }
+                            }
+                          },
+                          "attachments": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "filename": {
+                                  "type": "string"
+                                },
+                                "contentType": {
+                                  "type": "string"
+                                },
+                                "sizeBytes": {
+                                  "type": "number"
+                                },
+                                "url": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "mentions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                },
+                                "userId": {
+                                  "type": "string"
+                                },
+                                "roleId": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/messages/{messageId}": {
+          "patch": {
+            "summary": "Edit a message (author only)",
+            "tags": ["Messages"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["content"],
+                    "properties": {
+                      "content": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "delete": {
+            "summary": "Soft-delete a message (author or moderator+)",
+            "tags": ["Messages"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "204": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/messages/with-attachment": {
+          "post": {
+            "summary": "Send a message with a file attachment (multipart/form-data)",
+            "tags": ["Messages"],
+            "description": "Upload a file with an optional message. Fields: \"file\" (required), \"content\" (optional text).",
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/read-state/ack": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Read State"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/read-state/": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Read State"]
+          }
+        },
+        "/api/voice/ice-servers": {
+          "get": {
+            "summary": "Get ICE server configuration for WebRTC",
+            "tags": ["Voice"],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "ice_servers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "urls": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  }
+                                ]
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "credential": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/og": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Og"]
+          }
+        },
+        "/api/weather": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Weather"]
+          }
+        },
+        "/api/users/{userId}/dm": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/users/me/dm-channels": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/users/me/dm-unread": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/dm-channels/": {
+          "post": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/members": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/members/{userId}": {
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}": {
+          "patch": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/icon": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/notifications": {
+          "patch": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/voice/join": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/voice/leave": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/messages": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          },
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/messages/{messageId}": {
+          "patch": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/messages/{messageId}/reactions/{emoji}": {
+          "put": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emoji",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emoji",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/messages/{messageId}/reactions": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/dm-channels/{channelId}/read": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Dm Channels"]
+          }
+        },
+        "/api/users/me/blocks/": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/users/me/blocks/{userId}": {
+          "put": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/users/me/friends/": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/users/me/friends/pending": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/users/me/friends/by-username": {
+          "post": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/users/me/friends/{userId}": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          },
+          "put": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Users"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/messages/{messageId}/reactions/{emoji}": {
+          "put": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emoji",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Messages"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emoji",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Messages"]
+          },
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emoji",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Messages"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/messages/{messageId}/reactions/{emoji}/{userId}": {
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emoji",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "userId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Messages"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/messages/{messageId}/pin": {
+          "put": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Messages"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "messageId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Messages"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/pins": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Pins"]
+          }
+        },
+        "/api/servers/{serverId}/emojis/": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Emojis"]
+          },
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Emojis"]
+          }
+        },
+        "/api/servers/{serverId}/emojis/upload-image": {
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Emojis"]
+          }
+        },
+        "/api/servers/{serverId}/emojis/{emojiId}": {
+          "patch": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emojiId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Emojis"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emojiId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Emojis"]
+          }
+        },
+        "/api/servers/{serverId}/audit-log/": {
+          "get": {
+            "summary": "Get server audit log (requires VIEW_AUDIT_LOG)",
+            "tags": ["Audit Log"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "query",
+                "name": "before",
+                "required": false,
+                "description": "Cursor: entry ID to fetch before"
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "query",
+                "name": "limit",
+                "required": false,
+                "description": "Max entries to return (1-100, default 50)"
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "query",
+                "name": "action",
+                "required": false,
+                "description": "Filter by action type (e.g. MEMBER_BAN)"
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "query",
+                "name": "actorId",
+                "required": false,
+                "description": "Filter by actor user ID"
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "serverId": {
+                            "type": "string"
+                          },
+                          "actorId": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "targetType": {
+                            "type": "string"
+                          },
+                          "targetId": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "changes": {
+                            "type": "object",
+                            "additionalProperties": true
+                          },
+                          "reason": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "actor": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "avatarUrl": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/reports/": {
+          "post": {
+            "summary": "Submit a user report (rate-limited: 5/hour)",
+            "tags": ["Reports"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["reportedUserId", "category"],
+                    "properties": {
+                      "reportedUserId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "serverId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "messageId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "category": {
+                        "type": "string",
+                        "enum": ["spam", "harassment", "inappropriate", "other"]
+                      },
+                      "description": {
+                        "type": "string",
+                        "maxLength": 1024
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "201": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "reporterId": {
+                          "type": "string"
+                        },
+                        "reportedUserId": {
+                          "type": "string"
+                        },
+                        "serverId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "messageId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/onboarding/": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "serverId": {
+                          "type": "string"
+                        },
+                        "welcomeMessage": {
+                          "type": ["null", "string"]
+                        },
+                        "defaultChannels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "requiredRulesAck": {
+                          "type": "boolean"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "204": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Onboarding"]
+          },
+          "put": {
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "welcomeMessage": {
+                        "type": ["string", "null"]
+                      },
+                      "defaultChannels": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "requiredRulesAck": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "serverId": {
+                          "type": "string"
+                        },
+                        "welcomeMessage": {
+                          "type": ["null", "string"]
+                        },
+                        "defaultChannels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "requiredRulesAck": {
+                          "type": "boolean"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "tags": ["Onboarding"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Onboarding"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/bramble/posts": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Bramble"]
+          },
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Bramble"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/bramble/posts/{postId}": {
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "postId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Bramble"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/bramble/posts/{postId}/reactions/{emoji}": {
+          "put": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "postId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emoji",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Bramble"]
+          },
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "postId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "emoji",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Bramble"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/bramble/posts/{postId}/comments": {
+          "get": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "postId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Bramble"]
+          },
+          "post": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "postId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Bramble"]
+          }
+        },
+        "/api/servers/{serverId}/channels/{channelId}/bramble/posts/{postId}/comments/{commentId}": {
+          "delete": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "channelId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "postId",
+                "required": true
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "commentId",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Bramble"]
+          }
+        },
+        "/api/waitlist/join": {
+          "post": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Waitlist"]
+          }
+        },
+        "/api/public/blog/posts": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            },
+            "tags": ["Public"]
+          }
+        },
+        "/api/voice-invites/": {
+          "post": {
+            "summary": "Create a shareable voice call invite",
+            "tags": ["Voice Invites"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["serverId", "channelId", "activity", "expiresAt"],
+                    "properties": {
+                      "serverId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "channelId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "activity": {
+                        "type": "string",
+                        "enum": [
+                          "gaming",
+                          "coding",
+                          "watching",
+                          "planning",
+                          "chatting",
+                          "working",
+                          "studying"
+                        ]
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "maxUses": {
+                        "type": "number",
+                        "nullable": true
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "get": {
+            "summary": "List active voice invites created by the current user",
+            "tags": ["Voice Invites"],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/voice-invites/{code}": {
+          "get": {
+            "summary": "Resolve a voice invite code to its call card detail",
+            "tags": ["Voice Invites"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "code",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          },
+          "delete": {
+            "summary": "Revoke a voice invite (creator only)",
+            "tags": ["Voice Invites"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "code",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/voice-invites/{code}/join": {
+          "post": {
+            "summary": "Join a voice channel via invite (auto-grants server membership)",
+            "tags": ["Voice Invites"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "code",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/voice-invites/{code}/guest-join": {
+          "post": {
+            "summary": "Register as guest and join a voice channel via invite",
+            "tags": ["Voice Invites"],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": ["username"],
+                    "properties": {
+                      "username": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 32
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "path",
+                "name": "code",
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/servers/{serverId}/search/messages": {
+          "get": {
+            "summary": "Search messages in a server (across visible channels)",
+            "tags": ["Search"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "in": "query",
+                "name": "q",
+                "required": false,
+                "description": "Search query (min 2 chars unless authorId or channelId provided)"
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "query",
+                "name": "channelId",
+                "required": false,
+                "description": "Narrow to a single channel"
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "query",
+                "name": "authorId",
+                "required": false,
+                "description": "Narrow to a specific author"
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "query",
+                "name": "before",
+                "required": false,
+                "description": "Cursor: result ID to fetch before"
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "query",
+                "name": "limit",
+                "required": false,
+                "description": "Max results (1-50, default 25)"
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "path",
+                "name": "serverId",
+                "required": true
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/dm/search/messages": {
+          "get": {
+            "summary": "Search messages across the caller's DM channels",
+            "tags": ["Search"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 100
+                },
+                "in": "query",
+                "name": "q",
+                "required": true,
+                "description": "Search query"
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "query",
+                "name": "dmChannelId",
+                "required": false,
+                "description": "Narrow to a single DM channel"
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "in": "query",
+                "name": "before",
+                "required": false,
+                "description": "Cursor: result ID to fetch before"
+              },
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "query",
+                "name": "limit",
+                "required": false,
+                "description": "Max results (1-50, default 25)"
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        },
+        "/api/mentions/": {
+          "get": {
+            "summary": "List the caller's recent mentions across all servers",
+            "tags": ["Mentions"],
+            "parameters": [
+              {
+                "schema": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "in": "query",
+                "name": "limit",
+                "required": false
+              },
+              {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "in": "query",
+                "name": "before",
+                "required": false
+              },
+              {
+                "schema": {
+                  "type": "boolean"
+                },
+                "in": "query",
+                "name": "includeBroadcasts",
+                "required": false
+              }
+            ],
+            "security": [
+              {
+                "bearerAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Default Response"
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "securitySchemes": {
+          "bearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+          }
+        }
+      }
+    }

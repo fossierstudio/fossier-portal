@@ -10,7 +10,6 @@ app:
     - page:home: false
     - theme:app/light: false
     - theme:app/dark: false
-    - page:api-docs: false
 
 organization:
   name: Fossier Studio
