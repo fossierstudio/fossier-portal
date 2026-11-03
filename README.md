@@ -84,21 +84,21 @@ covers why.
 ## How it fits together
 
 ```mermaid
-flowchart LR
+flowchart TB
     browser[Browser] -->|HTTPS| cloudflare[Cloudflare]
     cloudflare --> tunnel
+    actions[Nightly export<br/>GitHub Actions] -->|commits to main| catalog
+    catalog[portal/catalog<br/>YAML and Markdown] -->|built into image| portal
+    catalog -.->|host copies every 15 min| history
     subgraph host[Linux host]
+        history[(Deploy history<br/>read-only mount)]
         subgraph stack[backstage-demo Compose project]
             tunnel[Tunnel container]
             portal[Backstage<br/>frontend and backend]
             postgres[(Postgres)]
             techdocs[(TechDocs volume)]
         end
-        history[(Deploy history<br/>read-only mount)]
     end
-    catalog[portal/catalog<br/>YAML and Markdown] -->|built into image| portal
-    actions[Nightly export<br/>GitHub Actions] -->|commits to main| catalog
-    catalog -.->|host copies every 15 min| history
     history --> portal
     tunnel --> portal
     portal --> postgres
