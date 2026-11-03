@@ -1,0 +1,46 @@
+name: Export deploys
+
+# Refreshes the deploys plugin's history from Bramble's and Canopy's production
+# workflows and commits it. Both repos are private, so each export uses its own
+# fine-grained token with only Actions: read on that repo. The host picks up the
+# new files from main within 15 minutes (deploy/sync-deploys.sh).
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: export-deploys
+  cancel-in-progress: false
+
+jobs:
+  export:
+    name: Export deploy history
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Export Bramble
+        env:
+          GH_TOKEN: ${{ secrets.BRAMBLE_ACTIONS_TOKEN }}
+        run: node scripts/export-deploys.mjs BroManDudeGuyPhD/Bramble deploy.yml main production portal/catalog/deploys/bramble-server.json
+
+      - name: Export Canopy
+        env:
+          GH_TOKEN: ${{ secrets.CANOPY_ACTIONS_TOKEN }}
+        run: node scripts/export-deploys.mjs fossierstudio/Canopy prod-deploy.yml main production portal/catalog/deploys/canopy-web.json
+
+      - name: Commit new runs
+        run: |
+          git add portal/catalog/deploys
+          if git diff --cached --quiet; then
+            echo "No new runs"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Refresh deploy history'
+          git push

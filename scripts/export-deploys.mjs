@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Exports a workflow's run history for the deploys plugin. The portal has no
-// internet access, so the history is exported here with the GitHub CLI and
-// shipped with the catalog. Only start times, durations, and results are kept,
-// not commits or messages.
+// internet access, so the history is exported with the GitHub CLI, nightly by
+// .github/workflows/export-deploys.yml, and committed with the catalog. Only
+// start times, durations, and results are kept, not commits or messages.
 //
 // The target names where a successful run deploys to, such as production or
 // "the dev cluster", and the portal uses it in its labels.
@@ -10,7 +10,7 @@
 //   node scripts/export-deploys.mjs <owner/repo> <workflow file> <branch> <target> <out.json>
 
 import { execFileSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 const [repo, workflow, branch, target, out] = process.argv.slice(2);
 if (!out) {
@@ -63,6 +63,20 @@ const history = {
     }))
     .sort((a, b) => a.startedAt.localeCompare(b.startedAt)),
 };
+
+// The nightly export commits whatever changed, so a file with no new runs is
+// left alone rather than rewritten with a new exportedAt.
+const unchanged = ({ exportedAt, ...rest }) => JSON.stringify(rest);
+let previous;
+try {
+  previous = JSON.parse(readFileSync(out, 'utf8'));
+} catch {
+  // No earlier export, or one that can't be read, so write a new one.
+}
+if (previous && unchanged(previous) === unchanged(history)) {
+  console.log(`${out} has no new runs`);
+  process.exit(0);
+}
 
 writeFileSync(out, `${JSON.stringify(history, null, 2)}\n`);
 console.log(`${history.runs.length} runs written to ${out}`);

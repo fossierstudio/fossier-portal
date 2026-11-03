@@ -87,8 +87,18 @@ no route to the internet, and opening one for a chart would undo that. Bramble's
 repository is also private, so a live integration would need a token able to
 read it on a public site. Instead, `scripts/export-deploys.mjs` exports the
 deploy workflow's runs with the GitHub CLI, keeping only start times, durations,
-and results, and the file ships with the catalog. The cost is that the figures
-are only as fresh as the last export.
+and results, and the file ships with the catalog.
+
+A nightly workflow in this repo runs the export and commits new runs. It pulls
+rather than having Bramble and Canopy push, because both production deploys run
+on a live server, and a push step would need a token that writes to this repo
+and could fail a good deploy. Each source repo gets its own fine-grained token
+with only Actions: read, since one token can't span two accounts and a classic
+token would read every private repo. The host then copies the files from `main`
+every 15 minutes into a read-only mount, which the backend reads on each request,
+so new runs need no rebuild. A self-hosted runner could have redeployed instead,
+but on a public repo that lets outside pull requests run code on the host. The
+figures are at most a day old.
 
 A successful run counts as a deploy, and its duration is the time from push to
 live, since the workflow starts on push and ends after the deploy step. A failed

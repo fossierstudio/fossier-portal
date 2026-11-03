@@ -18,5 +18,10 @@ git -C "$root" ls-files -co --exclude-standard -- portal |
 ssh "$host" "docker image inspect fossier-portal:latest >/dev/null 2>&1 &&
   docker tag fossier-portal:latest fossier-portal:previous;
   docker build -t fossier-portal:latest '$dir/src/portal'"
-scp -q "$root/deploy/docker-compose.yml" "$host:$dir/docker-compose.yml"
+scp -q "$root/deploy/docker-compose.yml" "$root/deploy/sync-deploys.sh" "$host:$dir/"
+# Deploy history comes from main, not this checkout, and refreshes every 15
+# minutes, so new runs appear without another deploy.
+ssh "$host" "chmod 755 '$dir/sync-deploys.sh' && '$dir/sync-deploys.sh' '$dir/deploys' &&
+  { crontab -l 2>/dev/null | grep -v sync-deploys.sh;
+    echo \"*/15 * * * * '$dir/sync-deploys.sh' '$dir/deploys' 2>&1 | logger -t sync-deploys\"; } | crontab -"
 ssh "$host" "cd '$dir' && docker compose up -d --wait"

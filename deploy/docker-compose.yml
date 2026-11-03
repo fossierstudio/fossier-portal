@@ -39,6 +39,8 @@ services:
       - private
     volumes:
       - techdocs-data:/app/techdocs
+      # Deploy history, kept current on the host by sync-deploys.sh.
+      - ./deploys:/app/catalog/deploys:ro
     healthcheck:
       test:
         - CMD

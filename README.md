@@ -74,8 +74,10 @@ Backstage's new backend and frontend systems.
 - Both have tests: the summary math, the routes (including names that try to
   reach other files), sign-in being required, and the tab itself.
 
-The portal has no route to the internet, so the history is exported and shipped
-with the catalog instead of fetched live. The
+The portal has no route to the internet, so the history is exported instead of
+fetched live. A [nightly workflow](.github/workflows/export-deploys.yml) exports
+it and commits any new runs, and the host copies the files from `main` into a
+read-only mount every 15 minutes, so new runs show up without a redeploy. The
 [decision log](docs/decisions.md#build-the-deploys-plugin-on-exported-history)
 covers why.
 
@@ -125,6 +127,10 @@ To update a running host, send the source and build the image there with:
 ```bash
 deploy/deploy.sh <ssh-host>
 ```
+
+This also installs a cron job on the host that keeps the deploy history current.
+The nightly export needs two repository secrets, `BRAMBLE_ACTIONS_TOKEN` and
+`CANOPY_ACTIONS_TOKEN`: fine-grained tokens with only Actions: read on each repo.
 
 ## Security
 
