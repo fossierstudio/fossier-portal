@@ -79,3 +79,19 @@ from the gateway's opcode and payload types.
 Each spec is written into its API entity's file rather than pulled in with
 `$text`, because Backstage won't resolve relative paths from a file location, to
 keep entities from reading arbitrary files on the host.
+
+## Build the deploys plugin on exported history
+
+The deploys plugin could have called the GitHub API directly, but the portal has
+no route to the internet, and opening one for a chart would undo that. Bramble's
+repository is also private, so a live integration would need a token able to
+read it on a public site. Instead, `scripts/export-deploys.mjs` exports the
+deploy workflow's runs with the GitHub CLI, keeping only start times, durations,
+and results, and the file ships with the catalog. The cost is that the figures
+are only as fresh as the last export.
+
+A successful run counts as a deploy, and its duration is the time from push to
+live, since the workflow starts on push and ends after the deploy step. A failed
+run failed its tests or its deploy, so it never reached production. That makes
+the failure share a CI measure, not DORA's change failure rate, which counts
+deploys that caused problems in production, and the portal labels it that way.

@@ -9,6 +9,8 @@ The Backstage app behind the Fossier Studio Portal. See the
 | `packages/app/src/modules/home/`  | Home page and system map                             |
 | `packages/app/src/modules/theme/` | Theme and Backstage UI tokens                        |
 | `packages/app/src/modules/nav/`   | Sidebar and wordmark                                 |
+| `plugins/deploys-backend/`        | Backend plugin that summarizes deploy history        |
+| `plugins/deploys/`                | Deploys tab and the API the home page uses           |
 | `Dockerfile`                      | Multi-stage production image                         |
 
 To run it locally:

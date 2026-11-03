@@ -57,3 +57,8 @@ catalog:
     # File locations are relative to the backend process, which is /app in the image.
     - type: file
       target: ./catalog/all.yaml
+
+# Deploy history for the deploys plugin, exported from CI by
+# scripts/export-deploys.mjs because the portal has no internet access.
+deploys:
+  dataDir: ./catalog/deploys

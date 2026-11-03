@@ -21,8 +21,9 @@ needed. It runs on a home server, so it may occasionally be offline.
 | **Canopy** | Staff scheduling for small counseling practices | Next.js and Expo, with Supabase on k3s |
 | **MetaMatching** | Three-player experiment platform for a PhD dissertation | Node.js under hardened systemd |
 
-Bramble has shipped 480 production deploys since March 2026, with a median of 6
-minutes from push to live. The [engineering page](https://fossier.studio/engineering/)
+Bramble has shipped 482 production deploys since March 2026, with a median of
+5.8 minutes from push to live, as counted by the portal's own
+[deploys plugin](#a-custom-plugin). The [engineering page](https://fossier.studio/engineering/)
 covers how these systems are built and operated.
 
 ## What this project shows
@@ -39,15 +40,43 @@ covers how these systems are built and operated.
 - **A custom frontend.** The home page is a React page in Backstage's new
   frontend system that draws the system map from the catalog API, so it follows
   the catalog as entries change. The theme matches the studio's site.
+- **A custom plugin.** A backend and frontend plugin pair, described below.
 - **Repeatable deployment.** A multi-stage Dockerfile, a Docker Compose stack
   with memory and CPU limits, and a [deploy script](deploy/deploy.sh) that keeps
   the previous image for rollback.
 - **CI on every change.** [GitHub Actions](.github/workflows/ci.yml) runs lint and
   tests, builds the production image, and validates the Compose file.
 
-| Catalog | System page | Docs | API |
-|---|---|---|---|
-| ![Catalog table](docs/images/catalog.png) | ![Bramble system page](docs/images/system.png) | ![Bramble docs](docs/images/docs.png) | ![Bramble REST API](docs/images/api.png) |
+| Catalog | System page | Docs |
+|---|---|---|
+| ![Catalog table](docs/images/catalog.png) | ![Bramble system page](docs/images/system.png) | ![Bramble docs](docs/images/docs.png) |
+
+| API | Deploys |
+|---|---|
+| ![Bramble REST API](docs/images/api.png) | ![Bramble server deploy history](docs/images/deploys.png) |
+
+## A custom plugin
+
+[`deploys-backend`](portal/plugins/deploys-backend) and
+[`deploys`](portal/plugins/deploys) show how often a service ships and how long
+it takes. They were scaffolded with `backstage-cli new` and written for
+Backstage's new backend and frontend systems.
+
+- The **backend** serves `/api/deploys/history/:name`. It reads a run history
+  exported from GitHub Actions by
+  [`scripts/export-deploys.mjs`](scripts/export-deploys.mjs) and works out
+  deploys, median and 90th percentile time from push to live, failed runs, and
+  runs per week.
+- The **frontend** adds a Deploys tab to any entity with a
+  `fossier.studio/deploy-history` annotation, and exports an API that the home
+  page uses, so its deploy figures come from the data rather than being typed in.
+- Both have tests: the summary math, the routes (including names that try to
+  reach other files), sign-in being required, and the tab itself.
+
+The portal has no route to the internet, so the history is exported and shipped
+with the catalog instead of fetched live. The
+[decision log](docs/decisions.md#build-the-deploys-plugin-on-exported-history)
+covers why.
 
 ## How it fits together
 
@@ -113,7 +142,8 @@ deploy/deploy.sh <ssh-host>
 
 ## What's next
 
-1. Live CI and Kubernetes status on each catalog page.
+1. Live CI and Kubernetes status on each catalog page, replacing the exported
+   deploy history.
 2. Self-service templates that create a new service with CI, docs, and a
    runbook, with real sign-in for anyone who can use them.
 3. GitOps deployment with Argo CD.

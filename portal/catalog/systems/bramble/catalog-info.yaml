@@ -31,6 +31,7 @@ metadata:
     - mediasoup
   annotations:
     backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/bramble/
+    fossier.studio/deploy-history: bramble-server
 spec:
   type: service
   lifecycle: production

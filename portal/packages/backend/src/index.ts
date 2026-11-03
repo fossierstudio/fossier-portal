@@ -33,4 +33,7 @@ backend.add(import('@backstage/plugin-search-backend-module-pg'));
 backend.add(import('@backstage/plugin-search-backend-module-catalog'));
 backend.add(import('@backstage/plugin-search-backend-module-techdocs'));
 
+// deploy history, from plugins/deploys-backend
+backend.add(import('@internal/backstage-plugin-deploys-backend'));
+
 backend.start();

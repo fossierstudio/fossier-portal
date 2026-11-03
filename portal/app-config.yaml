@@ -69,3 +69,8 @@ catalog:
 permission:
   # setting this to `false` will disable permissions
   enabled: true
+
+# Deploy history for the deploys plugin, exported from CI by
+# scripts/export-deploys.mjs because the portal has no internet access.
+deploys:
+  dataDir: ../../catalog/deploys

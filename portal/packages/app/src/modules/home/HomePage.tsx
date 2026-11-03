@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import { Progress } from '@backstage/core-components';
 import { useApi } from '@backstage/frontend-plugin-api';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
+import {
+  DeploySummary,
+  deploysApiRef,
+} from '@internal/backstage-plugin-deploys';
 import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core';
 import { CatalogRow, StudioSystem, SystemMap, toSystems } from './SystemMap';
@@ -52,16 +56,32 @@ const useStyles = makeStyles({
     '&:hover': { color: '#ffb3e6' },
     '&:focus-visible': { outline: '2px solid #ffb3e6', outlineOffset: 3 },
   },
+  deploys: {
+    color: 'inherit',
+    textDecorationColor: '#ff82d0',
+    textUnderlineOffset: 3,
+    '&:hover': { color: '#ffb3e6' },
+    '&:focus-visible': { outline: '2px solid #ffb3e6', outlineOffset: 3 },
+  },
   error: {
     color: '#efe9ed',
     fontSize: 18,
   },
 });
 
+const month = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+
 export const HomePage = () => {
   const classes = useStyles();
   const catalogApi = useApi(catalogApiRef);
+  const deploysApi = useApi(deploysApiRef);
   const [systems, setSystems] = useState<StudioSystem[]>();
+  const [deploys, setDeploys] = useState<DeploySummary>();
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -80,6 +100,14 @@ export const HomePage = () => {
       .catch(() => setFailed(true));
   }, [catalogApi]);
 
+  // The deploy sentence is left out if the history can't be read.
+  useEffect(() => {
+    deploysApi
+      .getHistory('bramble-server')
+      .then(setDeploys)
+      .catch(() => undefined);
+  }, [deploysApi]);
+
   const componentCount =
     systems?.reduce((total, system) => total + system.components.length, 0) ??
     0;
@@ -90,9 +118,21 @@ export const HomePage = () => {
       {systems && (
         <p className={classes.summary}>
           {systems.length} systems and {componentCount} components. Every
-          component has an owner, and every system has docs. Bramble alone has
-          shipped 480 production deploys since March 2026, with a median of 6
-          minutes from push to live.
+          component has an owner, and every system has docs.
+          {deploys?.firstDeploy && deploys.medianMinutes !== undefined && (
+            <>
+              {' '}
+              <Link
+                className={classes.deploys}
+                to="/catalog/default/component/bramble-server/deploys"
+              >
+                Bramble alone has shipped {deploys.deploys} production deploys
+                since {month(deploys.firstDeploy)}
+              </Link>
+              , with a median of {Math.round(deploys.medianMinutes)} minutes
+              from push to live.
+            </>
+          )}
         </p>
       )}
       <div className={classes.map}>
