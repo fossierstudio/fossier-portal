@@ -48,6 +48,8 @@ const useStyles = makeStyles(theme => ({
   week: {
     flex: '1 1 0',
     minWidth: 2,
+    // A short history would otherwise draw a few very wide bars.
+    maxWidth: 40,
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -64,6 +66,8 @@ const useStyles = makeStyles(theme => ({
   axis: {
     display: 'flex',
     justifyContent: 'space-between',
+    gap: theme.spacing(2),
+    whiteSpace: 'nowrap',
     marginTop: theme.spacing(1),
     color: theme.palette.text.secondary,
     fontSize: 13,
@@ -122,7 +126,7 @@ export const DeployHistoryView = ({ summary }: { summary: DeploySummary }) => {
     <>
       <div className={classes.stats}>
         <Stat
-          label="Production deploys"
+          label={`Deploys to ${summary.target}`}
           value={summary.deploys.toLocaleString('en-US')}
           detail={
             summary.firstDeploy
@@ -131,7 +135,7 @@ export const DeployHistoryView = ({ summary }: { summary: DeploySummary }) => {
           }
         />
         <Stat
-          label="Median push to live"
+          label={`Median push to ${summary.target}`}
           value={minutes(summary.medianMinutes)}
           detail={`90% within ${minutes(summary.p90Minutes)}`}
         />
@@ -147,36 +151,40 @@ export const DeployHistoryView = ({ summary }: { summary: DeploySummary }) => {
         />
       </div>
       <InfoCard title="Runs per week">
-        <div
-          className={classes.chart}
-          role="img"
-          aria-label={`Weekly runs over ${summary.weeks.length} weeks, with up to ${busiest} deploys in a week`}
-        >
-          {summary.weeks.map(week => (
-            <div
-              key={week.start}
-              className={classes.week}
-              title={`Week of ${day(week.start)}: ${week.deploys} deploys, ${
-                week.failed
-              } failed`}
-            >
+        {/* Bars are at most 40px wide with 3px gaps, so the axis ends where they do,
+            with room for both dates. */}
+        <div style={{ maxWidth: Math.max(260, summary.weeks.length * 43) }}>
+          <div
+            className={classes.chart}
+            role="img"
+            aria-label={`Weekly runs over ${summary.weeks.length} weeks, with up to ${busiest} deploys in a week`}
+          >
+            {summary.weeks.map(week => (
               <div
-                className={classes.failedBar}
-                style={{ height: `${(week.failed / peak) * 100}%` }}
-              />
-              <div
-                className={classes.deployBar}
-                style={{ height: `${(week.deploys / peak) * 100}%` }}
-              />
-            </div>
-          ))}
-        </div>
-        {first && last && (
-          <div className={classes.axis}>
-            <span>{day(first.start)}</span>
-            <span>{day(last.start)}</span>
+                key={week.start}
+                className={classes.week}
+                title={`Week of ${day(week.start)}: ${week.deploys} deploys, ${
+                  week.failed
+                } failed`}
+              >
+                <div
+                  className={classes.failedBar}
+                  style={{ height: `${(week.failed / peak) * 100}%` }}
+                />
+                <div
+                  className={classes.deployBar}
+                  style={{ height: `${(week.deploys / peak) * 100}%` }}
+                />
+              </div>
+            ))}
           </div>
-        )}
+          {first && last && (
+            <div className={classes.axis}>
+              <span>{day(first.start)}</span>
+              <span>{day(last.start)}</span>
+            </div>
+          )}
+        </div>
         <div className={classes.legend}>
           <span>
             <span className={`${classes.swatch} ${classes.deployBar}`} />
@@ -189,8 +197,8 @@ export const DeployHistoryView = ({ summary }: { summary: DeploySummary }) => {
         </div>
         <div className={classes.note}>
           {summary.description}, exported {day(summary.exportedAt)}. A failed
-          run failed its tests or its deploy step, so it never reached
-          production.
+          run failed its tests or its deploy step, so it never reached{' '}
+          {summary.target}.
         </div>
       </InfoCard>
     </>

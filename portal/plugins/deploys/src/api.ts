@@ -4,6 +4,8 @@ import { ResponseError } from '@backstage/errors';
 /** The summary served by the deploys backend at /history/:name. */
 export type DeploySummary = {
   description: string;
+  /** Where successful runs deploy to, such as production. */
+  target: string;
   exportedAt: string;
   firstDeploy?: string;
   lastDeploy?: string;

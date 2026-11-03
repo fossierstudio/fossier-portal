@@ -72,6 +72,13 @@ describe('summarize', () => {
     expect(summary.lastDeploy).toBe('2026-04-01T10:00:00Z');
   });
 
+  it('reports where runs deploy to, defaulting to production', () => {
+    expect(summarize(history([])).target).toBe('production');
+    expect(
+      summarize({ ...history([]), target: 'the dev cluster' }).target,
+    ).toBe('the dev cluster');
+  });
+
   it('handles a history with no runs', () => {
     expect(summarize(history([]))).toMatchObject({
       deploys: 0,

@@ -30,6 +30,7 @@ metadata:
     - typescript
   annotations:
     backstage.io/source-location: url:https://github.com/fossierstudio/fossier-portal/tree/main/portal/catalog/systems/canopy/
+    fossier.studio/deploy-history: canopy-web
 spec:
   type: website
   lifecycle: production

@@ -6,6 +6,7 @@ import { DeployHistory } from './DeployHistory';
 
 const summary: DeploySummary = {
   description: 'Completed runs of deploy.yml on main',
+  target: 'the dev cluster',
   exportedAt: '2026-11-02T00:00:00Z',
   firstDeploy: '2026-03-04T03:20:00Z',
   lastDeploy: '2026-11-01T18:44:43Z',
@@ -43,6 +44,10 @@ describe('DeployHistory', () => {
     );
 
     expect(await screen.findByText('482')).toBeInTheDocument();
+    expect(screen.getByText('Deploys to the dev cluster')).toBeInTheDocument();
+    expect(
+      screen.getByText('Median push to the dev cluster'),
+    ).toBeInTheDocument();
     expect(screen.getByText('5.8 min')).toBeInTheDocument();
     expect(screen.getByText('90% within 8.6 min')).toBeInTheDocument();
     expect(screen.getByText('14% of finished runs')).toBeInTheDocument();

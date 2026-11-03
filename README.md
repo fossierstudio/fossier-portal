@@ -63,12 +63,13 @@ it takes. They were scaffolded with `backstage-cli new` and written for
 Backstage's new backend and frontend systems.
 
 - The **backend** serves `/api/deploys/history/:name`. It reads a run history
-  exported from GitHub Actions by
+  exported from GitHub Actions, along with where those runs deploy to, by
   [`scripts/export-deploys.mjs`](scripts/export-deploys.mjs) and works out
   deploys, median and 90th percentile time from push to live, failed runs, and
   runs per week.
 - The **frontend** adds a Deploys tab to any entity with a
-  `fossier.studio/deploy-history` annotation, and exports an API that the home
+  `fossier.studio/deploy-history` annotation, which Bramble's server and
+  Canopy's web app have, and exports an API that the home
   page uses, so its deploy figures come from the data rather than being typed in.
 - Both have tests: the summary math, the routes (including names that try to
   reach other files), sign-in being required, and the tab itself.

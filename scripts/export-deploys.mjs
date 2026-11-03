@@ -4,15 +4,18 @@
 // shipped with the catalog. Only start times, durations, and results are kept,
 // not commits or messages.
 //
-//   node scripts/export-deploys.mjs <owner/repo> <workflow file> <branch> <out.json>
+// The target names where a successful run deploys to, such as production or
+// "the dev cluster", and the portal uses it in its labels.
+//
+//   node scripts/export-deploys.mjs <owner/repo> <workflow file> <branch> <target> <out.json>
 
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 
-const [repo, workflow, branch, out] = process.argv.slice(2);
+const [repo, workflow, branch, target, out] = process.argv.slice(2);
 if (!out) {
   console.error(
-    'usage: export-deploys.mjs <owner/repo> <workflow file> <branch> <out.json>',
+    'usage: export-deploys.mjs <owner/repo> <workflow file> <branch> <target> <out.json>',
   );
   process.exit(1);
 }
@@ -45,6 +48,7 @@ const results = new Set(['success', 'failure', 'cancelled']);
 
 const history = {
   description: `Completed runs of ${workflow} on ${branch}`,
+  target,
   exportedAt: new Date().toISOString(),
   runs: runs
     .filter(run => results.has(run.conclusion))

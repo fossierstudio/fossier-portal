@@ -7,6 +7,7 @@ Serves deploy history for the [deploys frontend plugin](../deploys).
 
 | Field                         | Meaning                                                |
 | ----------------------------- | ------------------------------------------------------ |
+| `target`                      | Where successful runs deploy to                        |
 | `deploys`                     | Successful runs                                        |
 | `medianMinutes`, `p90Minutes` | Time from push to live, over successful runs           |
 | `failedRuns`, `failureRate`   | Failed runs, and their share of runs that finished     |

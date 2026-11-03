@@ -7,6 +7,8 @@ export type Run = {
 
 export type History = {
   description: string;
+  /** Where successful runs deploy to. Older exports leave it out. */
+  target?: string;
   exportedAt: string;
   runs: Run[];
 };
@@ -20,6 +22,8 @@ export type Week = {
 
 export type Summary = {
   description: string;
+  /** Where successful runs deploy to, such as production. */
+  target: string;
   exportedAt: string;
   firstDeploy?: string;
   lastDeploy?: string;
@@ -94,6 +98,7 @@ export function summarize(history: History): Summary {
   const finished = deploys.length + failedRuns;
   return {
     description: history.description,
+    target: history.target ?? 'production',
     exportedAt: history.exportedAt,
     firstDeploy: deploys[0]?.startedAt,
     lastDeploy: deploys[deploys.length - 1]?.startedAt,
