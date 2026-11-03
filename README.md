@@ -94,8 +94,12 @@ flowchart LR
             postgres[(Postgres)]
             techdocs[(TechDocs volume)]
         end
+        history[(Deploy history<br/>read-only mount)]
     end
     catalog[portal/catalog<br/>YAML and Markdown] -->|built into image| portal
+    actions[Nightly export<br/>GitHub Actions] -->|commits to main| catalog
+    catalog -.->|host copies every 15 min| history
+    history --> portal
     tunnel --> portal
     portal --> postgres
     portal --> techdocs
